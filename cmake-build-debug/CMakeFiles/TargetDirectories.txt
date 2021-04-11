@@ -1,0 +1,3 @@
+/Users/ekaterinakarabut/CLionProjects/OS5/cmake-build-debug/CMakeFiles/rebuild_cache.dir
+/Users/ekaterinakarabut/CLionProjects/OS5/cmake-build-debug/CMakeFiles/edit_cache.dir
+/Users/ekaterinakarabut/CLionProjects/OS5/cmake-build-debug/CMakeFiles/OS5.dir
