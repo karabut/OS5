@@ -35,29 +35,41 @@ long long readNum()
 
 int fillTable(int fileDescriptor, size_t* lineLengths, off_t* fileOffsets){
     char readBuffer[BUFFER_SIZE];
-    int actualBufferSize =  BUFFER_SIZE;
+    int numberOfReadElements =  BUFFER_SIZE;
     int currentLineIndex = 1;
     int fileOffsetIndex = 1;
     int currentOffset = 0;
 
-    while (actualBufferSize > 0){
-        actualBufferSize = read(fileDescriptor, readBuffer, BUFFER_SIZE);
-        if (actualBufferSize == ERROR){
+    while (numberOfReadElements > 0){
+
+        //сколько считали из файла (максимально buffer size)
+        numberOfReadElements = read(fileDescriptor, readBuffer, BUFFER_SIZE);
+
+        if (numberOfReadElements == ERROR){
             perror("Can't read current text");
             return ERROR;
         }
 
-        for (size_t i = 0; i < actualBufferSize; i++){
+        //цикл по количеству считанных из файла элементов
+        for (size_t i = 0; i < numberOfReadElements; i++){
+
             lineLengths[currentLineIndex]++;
+
             currentOffset++;
+
             if (readBuffer[i] == '\n'){
+
                 fileOffsets[fileOffsetIndex] = (off_t)(currentOffset - lineLengths[currentLineIndex]);
+
                 currentLineIndex++;
+
                 fileOffsetIndex++;
+
             }
         }
 
     }
+
     return (currentLineIndex);
 }
 
@@ -70,6 +82,7 @@ int readLineFromFile(int fileDescriptor, int lineLength, off_t offset, char* lin
     }
 
     int readCheck = read(fileDescriptor, line, lineLength);
+
     if (readCheck == ERROR){
         perror("Can not read current text");
         return ERROR;
