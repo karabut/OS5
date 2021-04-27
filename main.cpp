@@ -34,7 +34,10 @@ long long readNum()
 
 
 int fillTable(int fileDescriptor, size_t* lineLengths, off_t* fileOffsets){
+
+    //буффер для считывания
     char readBuffer[BUFFER_SIZE];
+
     int numberOfReadElements =  BUFFER_SIZE;
     int currentLineIndex = 1;
     int fileOffsetIndex = 1;
@@ -42,9 +45,10 @@ int fillTable(int fileDescriptor, size_t* lineLengths, off_t* fileOffsets){
 
     while (numberOfReadElements > 0){
 
-        //сколько считали из файла (максимально buffer size)
+        //сколько считали из файла (максимально buffer size, если столько в файле есть)
         numberOfReadElements = read(fileDescriptor, readBuffer, BUFFER_SIZE);
 
+        //проверка на ошибку read
         if (numberOfReadElements == ERROR){
             perror("Can't read current text");
             return ERROR;
@@ -53,10 +57,13 @@ int fillTable(int fileDescriptor, size_t* lineLengths, off_t* fileOffsets){
         //цикл по количеству считанных из файла элементов
         for (size_t i = 0; i < numberOfReadElements; i++){
 
+            //добавляем к длине строки по +1
             lineLengths[currentLineIndex]++;
 
+            //добавляем к сдвигу по +1
             currentOffset++;
 
+            //если элемент - переход на новую строку
             if (readBuffer[i] == '\n'){
 
                 fileOffsets[fileOffsetIndex] = (off_t)(currentOffset - lineLengths[currentLineIndex]);
@@ -70,17 +77,20 @@ int fillTable(int fileDescriptor, size_t* lineLengths, off_t* fileOffsets){
 
     }
 
+    //возвращаем количество строк
     return (currentLineIndex);
 }
 
 int readLineFromFile(int fileDescriptor, int lineLength, off_t offset, char* line){
 
+    //устанавливаем смещение от начала файла
     off_t lseekCheck = lseek(fileDescriptor, offset, SEEK_SET);
     if (lseekCheck == ERROR){
         perror("Seek error");
         return ERROR;
     }
 
+    //считываем нужную строку из файла
     int readCheck = read(fileDescriptor, line, lineLength);
 
     if (readCheck == ERROR){
@@ -91,8 +101,8 @@ int readLineFromFile(int fileDescriptor, int lineLength, off_t offset, char* lin
     return EXIT_SUCCESS;
 }
 
-int printLine(char* line, int line_length){
-    int writeCheck = write(STDOUT_FILENO, line, line_length);
+int printLine(char* line, int lineLength){
+    int writeCheck = write(STDOUT_FILENO, line, lineLength);
     if (writeCheck == ERROR){
         perror("Can't print line");
         return ERROR;
@@ -101,12 +111,13 @@ int printLine(char* line, int line_length){
     return EXIT_SUCCESS;
 }
 
-int getLines(int file_descriptor, size_t* line_lengths, off_t* file_offsets, int number_of_lines){
+int getLines(int fileDescriptor, size_t* lineLengths, off_t* fileOffsets, int numberOfLines){
     off_t offset = 0;
     int lineLength = 0;
     long long lineNumber = 0;
 
     while(true){
+        //пользователь вводит нужную строку
         lineNumber = readNum();
 
         if (lineNumber == ERROR){
@@ -114,26 +125,33 @@ int getLines(int file_descriptor, size_t* line_lengths, off_t* file_offsets, int
             return ERROR;
         }
 
+        //если введенное число слишком большое или наборот
         if (lineNumber == LLONG_MAX || lineNumber == LLONG_MIN){
             perror("Invalid line number");
             continue;
         }
 
+        //если пользователь ввел 0
         if (lineNumber == STOP_LINE)
             break;
 
-        if (lineNumber > number_of_lines || lineNumber < 0){
+        //если такой строки нет или пользователь ввел отрицательно значение
+        if (lineNumber > numberOfLines || lineNumber < 0){
             printf("%s", "Invalid line number: No such line in file\n");
             continue;
         }
 
-        if (line_lengths[lineNumber] != 0){
-            offset = file_offsets[lineNumber];
-            lineLength = line_lengths[lineNumber];
+        //если строка не нулевая
+        if (lineLengths[lineNumber] != 0){
+            offset = fileOffsets[lineNumber];
+            lineLength = lineLengths[lineNumber];
+            //создаем буфер под размер строки
             char line[lineLength];
 
+
             int readLineCheck = 0;
-            readLineCheck = readLineFromFile(file_descriptor, lineLength, offset, line);
+            //считываем строку из файла в массив line
+            readLineCheck = readLineFromFile(fileDescriptor, lineLength, offset, line);
 
             if (readLineCheck == ERROR){
                 printf("%s", "Can't read line");
@@ -141,6 +159,7 @@ int getLines(int file_descriptor, size_t* line_lengths, off_t* file_offsets, int
             }
 
             int printLineCheck = 0;
+            //печатаем поолученную строку
             printLineCheck = printLine(line, lineLength);
             if (printLineCheck == ERROR){
                 printf("%s", "Can't print line");
@@ -154,6 +173,7 @@ int getLines(int file_descriptor, size_t* line_lengths, off_t* file_offsets, int
 
 int main(int argc, char* argv[]){
 
+    //инициализируем файловый дискриптор...таблицу сдвигов и длин строк
     int fileDescriptor = 0;
     int linesNumber = 0;
     off_t fileOffsets[TABLE_SIZE]  = {0};
@@ -169,11 +189,13 @@ int main(int argc, char* argv[]){
 
     fileDescriptor = open("text.txt", O_RDONLY); /* open for reading only */
 
+    //проверка открылся ли файл
     if (fileDescriptor == ERROR){
         perror("File can not be opened \n");
         return EXIT_FAILURE;
     }
 
+    //получаем количество строк в файле и параллельно строим таблицы
     linesNumber = fillTable(fileDescriptor, lineLengths, fileOffsets);
 
     if (linesNumber == ERROR){
@@ -181,8 +203,9 @@ int main(int argc, char* argv[]){
         return EXIT_FAILURE;
     }
 
-    int getLinesCheck = 0;
 
+    int getLinesCheck = 0;
+    //от пользователя получаем нужную строку
     getLinesCheck = getLines(fileDescriptor, lineLengths, fileOffsets, linesNumber);
 
     if (getLinesCheck == ERROR){
