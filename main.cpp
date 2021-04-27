@@ -73,6 +73,11 @@ int fillTable(int fileDescriptor, size_t* lineLengths, off_t* fileOffsets){
                 fileOffsetIndex++;
 
             }
+
+            if(currentLineIndex > TABLE_SIZE){
+                printf("File is too long. More than 256 lines");
+                return ERROR;
+            }
         }
 
     }
