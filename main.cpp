@@ -225,5 +225,7 @@ int main(int argc, char* argv[]){
         return EXIT_FAILURE;
     }
 
+    free(fileOffsets);
+    free(lineLengths);
     return EXIT_SUCCESS;
 }
