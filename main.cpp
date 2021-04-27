@@ -57,6 +57,11 @@ int fillTable(int fileDescriptor, size_t* lineLengths, off_t* fileOffsets){
         //цикл по количеству считанных из файла элементов
         for (size_t i = 0; i < numberOfReadElements; i++){
 
+            if(currentLineIndex > TABLE_SIZE){
+                perror("File is too long. More than 256 lines");
+                return ERROR;
+            }
+
             //добавляем к длине строки по +1
             lineLengths[currentLineIndex]++;
 
@@ -73,13 +78,7 @@ int fillTable(int fileDescriptor, size_t* lineLengths, off_t* fileOffsets){
                 fileOffsetIndex++;
 
             }
-
-            if(currentLineIndex > TABLE_SIZE){
-                printf("File is too long. More than 256 lines");
-                return ERROR;
-            }
         }
-
     }
 
     //возвращаем количество строк
