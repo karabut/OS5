@@ -59,6 +59,7 @@ int fillTable(int fileDescriptor, size_t* lineLengths, off_t* fileOffsets){
 
             if(currentLineIndex > TABLE_SIZE){
                 perror("File is too long. More than 256 lines");
+                free(readBuffer);
                 return ERROR;
             }
 
@@ -81,6 +82,7 @@ int fillTable(int fileDescriptor, size_t* lineLengths, off_t* fileOffsets){
         }
     }
 
+    free(readBuffer);
     //возвращаем количество строк
     return (currentLineIndex);
 }
@@ -159,6 +161,7 @@ int getLines(int fileDescriptor, size_t* lineLengths, off_t* fileOffsets, int nu
 
             if (readLineCheck == ERROR){
                 printf("%s", "Can't read line");
+                free(line);
                 return ERROR;
             }
 
@@ -167,8 +170,10 @@ int getLines(int fileDescriptor, size_t* lineLengths, off_t* fileOffsets, int nu
             printLineCheck = printLine(line, lineLength);
             if (printLineCheck == ERROR){
                 printf("%s", "Can't print line");
+                free(line);
                 return ERROR;
             }
+            free(line);
         }
         printf("\n");
     }
