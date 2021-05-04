@@ -11,6 +11,7 @@
 #define CONSOLE_INPUT_SIZE 30
 #define DECIMAL 0
 #define BUFFER_SIZE 1024
+#define NO_ERROR 0
 
 long long readNum()
 {
@@ -24,7 +25,7 @@ long long readNum()
     }
     size_t bytes_read = read(STDIN_FILENO, console_input, CONSOLE_INPUT_SIZE);
     
-    if (bytes_read == ERROR_READ) {
+    if (bytes_read == ERROR) {
 		perror("Can't get line number");
 		return ERROR;
 	}
