@@ -181,6 +181,11 @@ int getLines(int fileDescriptor, size_t* lineLengths, off_t* fileOffsets, int nu
 }
 
 int main(int argc, char* argv[]){
+    
+    if (argc < 2) {
+        printf("Need to add the file /n");
+        return EXIT_SUCCESS;
+    }
 
     //инициализируем файловый дискриптор...таблицу сдвигов и длин строк
     int fileDescriptor = 0;
