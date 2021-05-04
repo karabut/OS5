@@ -22,13 +22,24 @@ long long readNum()
         perror("Error in printing text for user");
         return ERROR;
     }
-    if (read(STDIN_FILENO, console_input, CONSOLE_INPUT_SIZE) == ERROR){
-        perror("Problems with reading your text");
-        return ERROR;
-    }
+    size_t bytes_read = read(STDIN_FILENO, console_input, CONSOLE_INPUT_SIZE);
+    
+    if (bytes_read == ERROR_READ) {
+		perror("Can't get line number");
+		return ERROR;
+	}
+	if (bytes_read == 0) {
+		return ERROR;
+	}
 
     numberOfTheLine = strtoll(console_input, &pVoid, DECIMAL);
-
+    
+    if (errno != NO_ERROR) {
+		perror("Can't convert given number");
+		errno = 0;
+		return ERROR;
+    }
+    
     return numberOfTheLine;
 }
 
