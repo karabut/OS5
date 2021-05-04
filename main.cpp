@@ -205,7 +205,7 @@ int main(int argc, char* argv[]){
 
     //проверка открылся ли файл
     if (fileDescriptor == ERROR){
-        perror("File can not be opened \n");
+        perror("File can not be opened /n");
         return EXIT_FAILURE;
     }
 
